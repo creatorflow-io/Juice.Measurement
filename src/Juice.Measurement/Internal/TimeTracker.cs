@@ -1,9 +1,6 @@
-﻿using System.Linq;
-using System.Text;
-using Juice.Measurement.Internal;
-using Juice.Utils;
+﻿using Juice.Utils;
 
-namespace Juice.Measurement
+namespace Juice.Measurement.Internal
 {
     /// <summary>
     /// Scoped service to track time.

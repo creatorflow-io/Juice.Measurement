@@ -1,4 +1,6 @@
-﻿namespace Juice.Measurement
+﻿using Juice.Measurement.Internal;
+
+namespace Juice.Measurement
 {
     public interface ITimeTracker: IDisposable
     {

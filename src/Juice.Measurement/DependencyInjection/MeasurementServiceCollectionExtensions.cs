@@ -1,4 +1,5 @@
 ﻿using Juice.Measurement;
+using Juice.Measurement.Internal;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
