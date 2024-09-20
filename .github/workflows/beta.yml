@@ -1,0 +1,11 @@
+name: Pack beta packages
+
+on:  workflow_dispatch
+
+
+jobs:
+  build:
+    uses: creatorflow-io/shared-workflows/.github/workflows/shared-pack.yml@master
+    with:
+       Stage: beta
+    secrets: inherit

@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{3F7E9EFB-4FB6-4AA2-ACD5-D809D633EF57}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Juice.Measurement", "src\Juice.Measurement\Juice.Measurement.csproj", "{183DBC23-D629-4C19-937B-75E133BEAE6D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{B3DEB372-CA2D-469E-826C-5409E8DF6AB9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Juice.Measurement.Test", "test\Juice.Measurement.Test\Juice.Measurement.Test.csproj", "{3106AA81-7469-452F-B637-C17E6D2A345B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{39C48E66-7BDD-4525-8A30-BD29C92907DE}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		nuget.config = nuget.config
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{9B709E8E-CFBB-4D37-998A-54E482557CBA}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\alpha.yml = .github\workflows\alpha.yml
+		.github\workflows\beta.yml = .github\workflows\beta.yml
+		.github\workflows\build-test.yml = .github\workflows\build-test.yml
+		.github\workflows\nuget-release.yml = .github\workflows\nuget-release.yml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{183DBC23-D629-4C19-937B-75E133BEAE6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{183DBC23-D629-4C19-937B-75E133BEAE6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{183DBC23-D629-4C19-937B-75E133BEAE6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{183DBC23-D629-4C19-937B-75E133BEAE6D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3106AA81-7469-452F-B637-C17E6D2A345B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3106AA81-7469-452F-B637-C17E6D2A345B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3106AA81-7469-452F-B637-C17E6D2A345B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3106AA81-7469-452F-B637-C17E6D2A345B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{183DBC23-D629-4C19-937B-75E133BEAE6D} = {3F7E9EFB-4FB6-4AA2-ACD5-D809D633EF57}
+		{3106AA81-7469-452F-B637-C17E6D2A345B} = {B3DEB372-CA2D-469E-826C-5409E8DF6AB9}
+		{9B709E8E-CFBB-4D37-998A-54E482557CBA} = {39C48E66-7BDD-4525-8A30-BD29C92907DE}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4FB1756E-DF12-4E11-9C11-8C610B389350}
+	EndGlobalSection
+EndGlobal
