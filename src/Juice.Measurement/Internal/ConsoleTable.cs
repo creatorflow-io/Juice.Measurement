@@ -9,11 +9,11 @@ namespace Juice.Utils
         private int[]? _cols;
         private ColAlign[]? _colsAlign;
         private ColAlign[]? _headsAlign;
-        private List<List<string>> _headers;
-        private List<List<string>> _rows;
+        private string[][] _headers;
+        private string[][] _rows;
         private StringBuilder _sb = new StringBuilder();
 
-        public ConsoleTable(List<List<string>> aheaders, List<List<string>> arows)
+        public ConsoleTable(string[][] aheaders, string[][] arows)
         {
             this._headers = aheaders;
             this._rows = arows;
@@ -58,13 +58,13 @@ namespace Juice.Utils
         public string PrintTable()
         {
             _sb.Clear();
-            if ((_headers != null && _headers.Count() > 0) || (_rows != null && _rows.Count() > 0))
+            if ((_headers != null && _headers.Length > 0) || (_rows != null && _rows.Length > 0))
             {
                 PrintTopLine();
             }
-            if (_headers != null && _headers.Count() > 0)
+            if (_headers != null && _headers.Length > 0)
             {
-                for (var i = 0; i < _headers.Count(); i++)
+                for (var i = 0; i < _headers.Length; i++)
                 {
                     PrintRow(_headers[i], _headsAlign);
                     PrintLine();
@@ -73,7 +73,7 @@ namespace Juice.Utils
 
             if (_rows != null)
             {
-                for (var i = 0; i < _rows.Count(); i++)
+                for (var i = 0; i < _rows.Length; i++)
                 {
                     PrintRow(_rows[i], _colsAlign);
                 }
@@ -124,13 +124,13 @@ namespace Juice.Utils
             }
         }
 
-        private void PrintRow(List<string> columns, ColAlign[]? colsAlign)
+        private void PrintRow(string[] columns, ColAlign[]? colsAlign)
         {
             _sb.Append("|");
-            if (_cols == null || columns.Count < _cols.Count())
+            if (_cols == null || columns.Length < _cols.Length)
             {
-                var width = (_tableWidth - columns.Count) / columns.Count;
-                for (var i = 0; i < columns.Count; i++)
+                var width = (_tableWidth - columns.Length) / columns.Length;
+                for (var i = 0; i < columns.Length; i++)
                 {
                     var column = columns[i];
                     if (colsAlign != null && colsAlign.Length > i)
@@ -157,9 +157,9 @@ namespace Juice.Utils
             }
             else
             {
-                for (var i = 0; i < _cols.Count(); i++)
+                for (var i = 0; i < _cols.Length; i++)
                 {
-                    var colValue = columns.Count > i ? columns[i] : "";
+                    var colValue = columns.Length > i ? columns[i] : "";
                     if (colsAlign != null && colsAlign.Length > i)
                     {
                         switch (colsAlign[i])

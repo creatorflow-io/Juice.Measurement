@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Linq;
+using System.Text;
 using Juice.Measurement.Internal;
 using Juice.Utils;
 
@@ -7,16 +8,12 @@ namespace Juice.Measurement
     /// <summary>
     /// Scoped service to track time.
     /// </summary>
-	public class TimeTracker : IDisposable
+	public class TimeTracker : ITimeTracker
     {
         private Stack<string> _scopes = new();
         public List<ExecutionRecord> Records { get; } = new();
 
-        /// <summary>
-        /// Create a new scope to tracking time.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
+        /// <inheritdoc />
         public IDisposable NewExecutionScope(string name)
         {
 
@@ -30,15 +27,21 @@ namespace Juice.Measurement
             return scope;
         }
 
-        override public string ToString()
+        public string ToString(bool displayMillisecond)
         {
             // Create a table to display the execution records.
-            var table = new ConsoleTable(new List<List<string>> { new List<string> { "Scope", "Depth", "Elapsed Time" } },
-                Records.Select(r => new List<string> { r.ScopeName, r.Depth.ToString(), r.ElapsedTime.ToString() }).ToList());
+            var table = new ConsoleTable(new string[][] { new string[] { "Scope", "Depth", "Elapsed Time" } },
+                Records.Select(r => new string[] { r.ScopeName, r.Depth.ToString(),
+                    displayMillisecond ? r.ElapsedTime.TotalMilliseconds + " ms" : r.ElapsedTime.ToString() }).ToArray());
             var maxLen = Records.Max(r => r.ScopeName.Length);
             table.Cols = new int[] { maxLen + 2, 10, 20 };
-            table.ColsAlign = new [] { ColAlign.left, ColAlign.center, ColAlign.right };
+            table.ColsAlign = new[] { ColAlign.left, ColAlign.center, ColAlign.right };
             return table.PrintTable();
+        }
+
+        override public string ToString()
+        {
+            return ToString(false);
         }
 
         private string GetScopeName()

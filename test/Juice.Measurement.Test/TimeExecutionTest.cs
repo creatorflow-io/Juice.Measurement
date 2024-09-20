@@ -42,6 +42,7 @@ namespace Juice.Measurement.Test
                 }
             }
             _output.WriteLine(timeTracker.ToString());
+            _output.WriteLine(timeTracker.ToString(true));
             _output.WriteLine("Longest run: " + timeTracker.Records.Where(r => r.Depth > 1).MaxBy(r => r.ElapsedTime));
         }
     }
