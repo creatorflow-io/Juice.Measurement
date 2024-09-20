@@ -18,7 +18,7 @@ namespace Juice.Measurement.Test
         [Fact]
         public async Task TimeTracker_shouldAsync()
         {
-            var timeTracker = new TimeTracker();
+            ITimeTracker timeTracker = new TimeTracker();
             using (timeTracker.NewExecutionScope("Test"))
             {
                 // Do something

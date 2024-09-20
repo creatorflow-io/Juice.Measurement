@@ -7,7 +7,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddExecutionTimeMeasurement(this IServiceCollection services)
         {
-            services.AddSingleton<ITimeTracker, TimeTracker>();
+            services.AddScoped<ITimeTracker, TimeTracker>();
             return services;
         }
     }
