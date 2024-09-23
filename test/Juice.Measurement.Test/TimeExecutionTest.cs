@@ -19,31 +19,35 @@ namespace Juice.Measurement.Test
         public async Task TimeTracker_shouldAsync()
         {
             ITimeTracker timeTracker = new TimeTracker();
-            using (timeTracker.NewExecutionScope("Test"))
+            using (timeTracker.BeginScope("Test"))
             {
                 // Do something
                 await Task.Delay(12);
 
-                using (timeTracker.NewExecutionScope("Inner Test"))
+                using (timeTracker.BeginScope("Inner Test"))
                 {
                     // Do something
                     await Task.Delay(15);
 
-                    using (timeTracker.NewExecutionScope("Inner Inner Test"))
+                    using (timeTracker.BeginScope("Inner Inner Test"))
                     {
                         // Do something
+                        timeTracker.Checkpoint("Checkpoint 1");
                         await Task.Delay(20);
+                        timeTracker.Checkpoint("Checkpoint 2");
                     }
                 }
 
-                using (timeTracker.NewExecutionScope("Inner Test 2"))
+                using (timeTracker.BeginScope("Inner Test 2"))
                 {
                     // Do something
                     await Task.Delay(10);
+                    timeTracker.Checkpoint("Checkpoint 3");
+                    timeTracker.Checkpoint("Checkpoint 4");
                 }
             }
             _output.WriteLine(timeTracker.ToString());
-            _output.WriteLine(timeTracker.ToString(true));
+            _output.WriteLine(timeTracker.ToString(false));
             _output.WriteLine("Longest run: " + timeTracker.Records.Where(r => r.Depth > 1).MaxBy(r => r.ElapsedTime));
         }
     }

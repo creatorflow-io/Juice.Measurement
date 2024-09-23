@@ -1,4 +1,5 @@
 ﻿using Juice.Utils;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Juice.Measurement.Internal
 {
@@ -7,43 +8,65 @@ namespace Juice.Measurement.Internal
     /// </summary>
 	public class TimeTracker : ITimeTracker
     {
-        private Stack<string> _scopes = new();
+        private Stack<ExecutionScope> _scopes = new();
+        private ExecutionScope? _currentScope;
+
+        private Stack<string> _scopesName = new();
         public List<ExecutionRecord> Records { get; } = new();
 
         /// <inheritdoc />
-        public IDisposable NewExecutionScope(string name)
+        public IDisposable BeginScope(string name)
         {
-
-            _scopes.Push(name);
+            _scopesName.Push(name);
             var scope = new ExecutionScope(GetScopeName(), name);
             scope.OnDispose += (sender, args) =>
             {
-                Records.Add(new ExecutionRecord(args.OriginalScopeName, args.ScopeName, _scopes.Count, args.ElapsedTime));
-                _scopes.Pop();
+                if (sender is ExecutionScope scope)
+                {
+                    Records.Add(new ExecutionRecord(args.OriginalScopeName, args.ScopeName, _scopesName.Count, scope.ElapsedTime, scope.Checkpoints));
+                }
+                _scopesName.Pop();
+                _scopes.TryPop(out _currentScope);
             };
+            _scopes.Push(scope);
+            _currentScope = scope;
             return scope;
         }
+
+        /// <inheritdoc />
+        public void Checkpoint(string name)
+        {
+            _currentScope?.Checkpoint(name);
+        }
+
+        private static readonly string[] _header = new string[] { "Scope", "Depth", "Elapsed Time" };
+        private static readonly ColAlign[] _colsAlign = new[] { ColAlign.left, ColAlign.center, ColAlign.right };
 
         public string ToString(bool displayMillisecond)
         {
             // Create a table to display the execution records.
-            var table = new ConsoleTable(new string[][] { new string[] { "Scope", "Depth", "Elapsed Time" } },
-                Records.Select(r => new string[] { r.ScopeName, r.Depth.ToString(),
-                    displayMillisecond ? r.ElapsedTime.TotalMilliseconds + " ms" : r.ElapsedTime.ToString() }).ToArray());
+            var table = new ConsoleTable(new string[][] { _header },
+                Records.SelectMany(r => (new string[][] {
+                    new string[] { r.ScopeName, r.Depth.ToString(), displayMillisecond ? r.ElapsedTime.TotalMilliseconds + " ms" : r.ElapsedTime.ToString() }
+                    })
+                    .Union(
+                        r.Checkpoints.Select(c => new string[] { "> " + c.Name, r.Depth.ToString(), $"+{c.ElapsedMs} ms" })
+                    )
+                ).ToArray());
             var maxLen = Records.Max(r => r.ScopeName.Length);
             table.Cols = new int[] { maxLen + 2, 10, 20 };
-            table.ColsAlign = new[] { ColAlign.left, ColAlign.center, ColAlign.right };
+            table.ColsAlign = _colsAlign;
             return table.PrintTable();
         }
 
         override public string ToString()
         {
-            return ToString(false);
+            return ToString(true);
         }
 
         private string GetScopeName()
         {
-            return string.Join(" -> ", _scopes.Reverse());
+            return string.Join(" -> ", _scopesName.Reverse());
         }
 
         private bool _disposedValue;
@@ -54,7 +77,7 @@ namespace Juice.Measurement.Internal
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects)
-                    _scopes.Clear();
+                    _scopesName.Clear();
                     Records.Clear();
                 }
 
@@ -69,5 +92,6 @@ namespace Juice.Measurement.Internal
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+
     }
 }

@@ -14,7 +14,13 @@ namespace Juice.Measurement
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        IDisposable NewExecutionScope(string name);
+        IDisposable BeginScope(string name);
+
+        /// <summary>
+        /// Print the elapsed time from begin scope.
+        /// </summary>
+        /// <param name="name"></param>
+        void Checkpoint(string name);
 
         string ToString(bool displayMillisecond);
     }
