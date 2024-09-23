@@ -26,7 +26,8 @@ namespace Juice.Measurement.Internal
                     Records.Add(new ExecutionRecord(args.OriginalScopeName, args.ScopeName, _scopesName.Count, scope.ElapsedTime, scope.Checkpoints));
                 }
                 _scopesName.Pop();
-                _scopes.TryPop(out _currentScope);
+                _scopes.Pop();
+                _currentScope = _scopes.Count > 0 ? _scopes.Peek() : null;
             };
             _scopes.Push(scope);
             _currentScope = scope;

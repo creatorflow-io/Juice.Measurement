@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using FluentAssertions;
 using Juice.Measurement.Internal;
 using Xunit;
 using Xunit.Abstractions;
@@ -23,6 +24,7 @@ namespace Juice.Measurement.Test
             {
                 // Do something
                 await Task.Delay(12);
+                timeTracker.Checkpoint("Checkpoint 0");
 
                 using (timeTracker.BeginScope("Inner Test"))
                 {
@@ -32,23 +34,35 @@ namespace Juice.Measurement.Test
                     using (timeTracker.BeginScope("Inner Inner Test"))
                     {
                         // Do something
-                        timeTracker.Checkpoint("Checkpoint 1");
+                        timeTracker.Checkpoint("Checkpoint 1.1");
                         await Task.Delay(20);
-                        timeTracker.Checkpoint("Checkpoint 2");
+                        timeTracker.Checkpoint("Checkpoint 1.2");
                     }
                 }
-
+                timeTracker.Checkpoint("Checkpoint 1");
                 using (timeTracker.BeginScope("Inner Test 2"))
                 {
                     // Do something
                     await Task.Delay(10);
-                    timeTracker.Checkpoint("Checkpoint 3");
-                    timeTracker.Checkpoint("Checkpoint 4");
+                    timeTracker.Checkpoint("Checkpoint 1.3");
+                    timeTracker.Checkpoint("Checkpoint 1.4");
                 }
             }
             _output.WriteLine(timeTracker.ToString());
             _output.WriteLine(timeTracker.ToString(false));
             _output.WriteLine("Longest run: " + timeTracker.Records.Where(r => r.Depth > 1).MaxBy(r => r.ElapsedTime));
+            timeTracker.Records.Should().Contain(r => r.Checkpoints.Any(c => c.Name == "Checkpoint 0"));
+            timeTracker.Records.Should().Contain(r => r.Checkpoints.Any(c => c.Name == "Checkpoint 1"));
+            timeTracker.Records.Should().Contain(r => r.Checkpoints.Any(c => c.Name == "Checkpoint 1.1"));
+            timeTracker.Records.Should().Contain(r => r.Checkpoints.Any(c => c.Name == "Checkpoint 1.2"));
+            timeTracker.Records.Should().Contain(r => r.Checkpoints.Any(c => c.Name == "Checkpoint 1.3"));
+            timeTracker.Records.Should().Contain(r => r.Checkpoints.Any(c => c.Name == "Checkpoint 1.4"));
+
+            timeTracker.Records.Should().Contain(r => r.OriginalScopeName == "Test");
+            timeTracker.Records.Should().Contain(r => r.OriginalScopeName == "Inner Test");
+            timeTracker.Records.Should().Contain(r => r.OriginalScopeName == "Inner Inner Test");
+            timeTracker.Records.Should().Contain(r => r.OriginalScopeName == "Inner Test 2");
+
         }
     }
 }
