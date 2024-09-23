@@ -49,7 +49,7 @@ namespace Juice.Measurement.Test
                 }
             }
             _output.WriteLine(timeTracker.ToString());
-            _output.WriteLine(timeTracker.ToString(false));
+            _output.WriteLine(timeTracker.ToString(false, 2));
             _output.WriteLine("Longest run: " + timeTracker.Records.Where(r => r.Depth > 1).MaxBy(r => r.ElapsedTime));
             timeTracker.Records.Should().Contain(r => r.Checkpoints.Any(c => c.Name == "Checkpoint 0"));
             timeTracker.Records.Should().Contain(r => r.Checkpoints.Any(c => c.Name == "Checkpoint 1"));

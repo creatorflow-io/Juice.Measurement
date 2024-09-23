@@ -22,6 +22,12 @@ namespace Juice.Measurement
         /// <param name="name"></param>
         void Checkpoint(string name);
 
-        string ToString(bool displayMillisecond);
+        /// <summary>
+        /// Print the execution records in a table.
+        /// </summary>
+        /// <param name="displayMillisecond"></param>
+        /// <param name="maxDepth"></param>
+        /// <returns></returns>
+        string ToString(bool displayMillisecond, int? maxDepth = default);
     }
 }

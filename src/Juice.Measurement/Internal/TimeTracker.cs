@@ -43,11 +43,12 @@ namespace Juice.Measurement.Internal
         private static readonly string[] _header = new string[] { "Scope", "Depth", "Elapsed Time" };
         private static readonly ColAlign[] _colsAlign = new[] { ColAlign.left, ColAlign.center, ColAlign.right };
 
-        public string ToString(bool displayMillisecond)
+        public string ToString(bool displayMillisecond, int? maxDepth = default)
         {
             // Create a table to display the execution records.
             var table = new ConsoleTable(new string[][] { _header },
-                Records.SelectMany(r => (new string[][] {
+                Records.Where(r => !maxDepth.HasValue || r.Depth <= maxDepth)
+                .SelectMany(r => (new string[][] {
                     new string[] { r.ScopeName, r.Depth.ToString(), displayMillisecond ? r.ElapsedTime.TotalMilliseconds + " ms" : r.ElapsedTime.ToString() }
                     })
                     .Union(
