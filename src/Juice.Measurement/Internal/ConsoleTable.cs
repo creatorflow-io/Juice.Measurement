@@ -11,7 +11,7 @@ namespace Juice.Utils
         private ColAlign[]? _headsAlign;
         private string[][] _headers;
         private string[][] _rows;
-        private StringBuilder _sb = new StringBuilder();
+        private StringBuilder _sb = new ();
 
         public ConsoleTable(string[][] aheaders, string[][] arows)
         {
@@ -75,7 +75,14 @@ namespace Juice.Utils
             {
                 for (var i = 0; i < _rows.Length; i++)
                 {
-                    PrintRow(_rows[i], _colsAlign);
+                    if (_rows[i].Length == 0)
+                    {
+                        if(i > 0) { PrintLine(); }
+                    }
+                    else
+                    {
+                        PrintRow(_rows[i], _colsAlign);
+                    }
                 }
                 PrintBottomLine();
             }

@@ -1,4 +1,5 @@
-﻿using Juice.Utils;
+﻿using System.Diagnostics;
+using Juice.Utils;
 using static System.Formats.Asn1.AsnWriter;
 
 namespace Juice.Measurement.Internal
@@ -8,6 +9,7 @@ namespace Juice.Measurement.Internal
     /// </summary>
 	public class TimeTracker : ITimeTracker
     {
+        private Stopwatch _stopwatch = Stopwatch.StartNew();
         private Stack<ExecutionScope> _scopes = new();
         private ExecutionScope? _currentScope;
 
@@ -31,6 +33,7 @@ namespace Juice.Measurement.Internal
             };
             _scopes.Push(scope);
             _currentScope = scope;
+            _currentScope?.Checkpoint("Begin", _stopwatch.ElapsedMilliseconds);
             return scope;
         }
 
@@ -40,23 +43,31 @@ namespace Juice.Measurement.Internal
             _currentScope?.Checkpoint(name);
         }
 
-        private static readonly string[] _header = new string[] { "Scope", "Depth", "Elapsed Time" };
-        private static readonly ColAlign[] _colsAlign = new[] { ColAlign.left, ColAlign.center, ColAlign.right };
+        private static readonly string[] _header = ["Scope", "Depth", "Elapsed Time"];
+        private static readonly ColAlign[] _colsAlign = [ColAlign.left, ColAlign.center, ColAlign.right];
 
         public string ToString(bool displayMillisecond, int? maxDepth = default)
         {
             // Create a table to display the execution records.
-            var table = new ConsoleTable(new string[][] { _header },
+            var table = new ConsoleTable([_header],
                 Records.Where(r => !maxDepth.HasValue || r.Depth <= maxDepth)
-                .SelectMany(r => (new string[][] {
-                    new string[] { r.ScopeName, r.Depth.ToString(), displayMillisecond ? r.ElapsedTime.TotalMilliseconds + " ms" : r.ElapsedTime.ToString() }
-                    })
-                    .Union(
-                        r.Checkpoints.Select(c => new string[] { "> " + c.Name, r.Depth.ToString(), $"+{c.ElapsedMs} ms" })
-                    )
-                ).ToArray());
+                .SelectMany(r =>
+                {
+                    var scope = new List<string[]>
+                    {
+                    };
+                    if (r.Checkpoints.Length > 0)
+                    {
+                        scope.Add([]);
+                        scope.AddRange(r.Checkpoints.Select(c => new string[] { "> " + c.Name, r.Depth.ToString(), "+" + c.ElapsedMs + " ms" }));
+                    }
+                    scope.Add([r.ScopeName, r.Depth.ToString(), displayMillisecond ? r.ElapsedTime.TotalMilliseconds + " ms" : r.ElapsedTime.ToString()]);
+                    return scope;
+                })
+                .Concat([[], ["Total", "", displayMillisecond ? _stopwatch.ElapsedMilliseconds + " ms" : _stopwatch.Elapsed.ToString()]]).ToArray());
+
             var maxLen = Records.Max(r => r.ScopeName.Length);
-            table.Cols = new int[] { maxLen + 2, 10, 20 };
+            table.Cols = [maxLen + 2, 10, 20];
             table.ColsAlign = _colsAlign;
             return table.PrintTable();
         }
@@ -80,6 +91,9 @@ namespace Juice.Measurement.Internal
                 {
                     // TODO: dispose managed state (managed objects)
                     _scopesName.Clear();
+                    _scopes.Clear();
+                    _currentScope = null;
+                    _stopwatch.Stop();
                     Records.Clear();
                 }
 

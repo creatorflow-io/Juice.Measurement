@@ -23,9 +23,9 @@ namespace Juice.Measurement.Internal
             _originalScopeName = originalScopeName;
         }
 
-        public void Checkpoint(string name)
+        public void Checkpoint(string name, long? elapsedMs = default)
         {
-            _checkpoints.Add(new Checkpoint(name, _checkpointStopwatch?.ElapsedMilliseconds??0));
+            _checkpoints.Add(new Checkpoint(name, elapsedMs ?? _checkpointStopwatch?.ElapsedMilliseconds??0));
             _checkpointStopwatch?.Restart();
         }
 
