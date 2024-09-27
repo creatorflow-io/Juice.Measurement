@@ -7,7 +7,7 @@ namespace Juice.Measurement
         /// <summary>
         /// Execution records.
         /// </summary>
-        List<ExecutionRecord> Records { get; }
+        List<ITrackRecord> Records { get; }
 
         /// <summary>
         /// Create a new scope to tracking time.
@@ -25,9 +25,9 @@ namespace Juice.Measurement
         /// <summary>
         /// Print the execution records in a table.
         /// </summary>
-        /// <param name="displayMillisecond"></param>
+        /// <param name="humanReadable"></param>
         /// <param name="maxDepth"></param>
         /// <returns></returns>
-        string ToString(bool displayMillisecond, int? maxDepth = default);
+        string ToString(bool humanReadable, int? maxDepth = default);
     }
 }

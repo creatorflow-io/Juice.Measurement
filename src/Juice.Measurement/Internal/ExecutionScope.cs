@@ -6,28 +6,29 @@ namespace Juice.Measurement.Internal
     {
         public EventHandler<ExecutionScopeDisposingEventArgs>? OnDispose;
         private Stopwatch? _stopwatch;
-        private Stopwatch? _checkpointStopwatch;
+        private Stopwatch? _checkpoint;
         private string _scopeName;
         private string _originalScopeName;
-        private bool _disposedValue;
-        private List<Checkpoint> _checkpoints = new();
-
-        public Checkpoint[] Checkpoints => _checkpoints.ToArray();
         public TimeSpan ElapsedTime => _stopwatch?.Elapsed ?? TimeSpan.Zero;
+        public TimeSpan CheckpointTime
+        {
+            get
+            {
+                var checkpointTime = _checkpoint?.Elapsed ?? TimeSpan.Zero;
+                _checkpoint?.Restart();
+                return checkpointTime;
+            }
+        }
 
         public ExecutionScope(string scopeName, string originalScopeName)
         {
             _stopwatch = Stopwatch.StartNew();
-            _checkpointStopwatch = Stopwatch.StartNew();
+            _checkpoint = Stopwatch.StartNew();
             _scopeName = scopeName;
             _originalScopeName = originalScopeName;
         }
 
-        public void Checkpoint(string name, long? elapsedMs = default)
-        {
-            _checkpoints.Add(new Checkpoint(name, elapsedMs ?? _checkpointStopwatch?.ElapsedMilliseconds??0));
-            _checkpointStopwatch?.Restart();
-        }
+        private bool _disposedValue;
 
         protected virtual void Dispose(bool disposing)
         {
@@ -37,6 +38,7 @@ namespace Juice.Measurement.Internal
                 {
                     // TODO: dispose managed state (managed objects)
                     _stopwatch?.Stop();
+                    _checkpoint?.Stop();
                     OnDispose?.Invoke(this, new ExecutionScopeDisposingEventArgs(_scopeName, _originalScopeName));
                 }
 
@@ -44,8 +46,7 @@ namespace Juice.Measurement.Internal
                 // TODO: set large fields to null
                 OnDispose = null;
                 _stopwatch = null;
-                _checkpointStopwatch = null;
-                _checkpoints.Clear();
+                _checkpoint = null;
                 _disposedValue = true;
             }
         }
