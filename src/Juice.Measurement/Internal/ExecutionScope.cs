@@ -4,11 +4,14 @@ namespace Juice.Measurement.Internal
 {
     internal class ExecutionScope : IDisposable
     {
-        public EventHandler<ExecutionScopeDisposingEventArgs>? OnDispose;
+        public EventHandler? OnDispose;
         private Stopwatch? _stopwatch;
         private Stopwatch? _checkpoint;
         private string _scopeName;
-        private string _originalScopeName;
+        private string _scopeFullName;
+
+        public string Name => _scopeName;
+        public string FullName => _scopeFullName;
         public TimeSpan ElapsedTime => _stopwatch?.Elapsed ?? TimeSpan.Zero;
         public TimeSpan CheckpointTime
         {
@@ -20,12 +23,12 @@ namespace Juice.Measurement.Internal
             }
         }
 
-        public ExecutionScope(string scopeName, string originalScopeName)
+        public ExecutionScope(string scopeName, string scopeFullName)
         {
             _stopwatch = Stopwatch.StartNew();
             _checkpoint = Stopwatch.StartNew();
             _scopeName = scopeName;
-            _originalScopeName = originalScopeName;
+            _scopeFullName = scopeFullName;
         }
 
         private bool _disposedValue;
@@ -39,7 +42,7 @@ namespace Juice.Measurement.Internal
                     // TODO: dispose managed state (managed objects)
                     _stopwatch?.Stop();
                     _checkpoint?.Stop();
-                    OnDispose?.Invoke(this, new ExecutionScopeDisposingEventArgs(_scopeName, _originalScopeName));
+                    OnDispose?.Invoke(this, EventArgs.Empty);
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer

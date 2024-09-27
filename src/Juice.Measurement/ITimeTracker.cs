@@ -27,7 +27,8 @@ namespace Juice.Measurement
         /// </summary>
         /// <param name="humanReadable"></param>
         /// <param name="maxDepth"></param>
+        /// <param name="checkpoint"></param>
         /// <returns></returns>
-        string ToString(bool humanReadable, int? maxDepth = default);
+        string ToString(bool humanReadable, int? maxDepth = default, bool checkpoint = true);
     }
 }

@@ -20,12 +20,12 @@ namespace Juice.Measurement.Internal
         public IDisposable BeginScope(string name)
         {
             _scopesName.Push(name);
-            var scope = new ExecutionScope(GetScopeName(), name);
+            var scope = new ExecutionScope(name, GetScopeFullName());
             scope.OnDispose += (sender, args) =>
             {
                 if (sender is ExecutionScope scope)
                 {
-                    Records.Add(new ScopeEnd(args.OriginalScopeName, args.ScopeName, _scopesName.Count, scope.ElapsedTime));
+                    Records.Add(new ScopeEnd(scope.Name, scope.FullName, _scopesName.Count, scope.ElapsedTime));
                 }
                 _scopesName.Pop();
                 _scopes.Pop();
@@ -33,7 +33,7 @@ namespace Juice.Measurement.Internal
             };
             _scopes.Push(scope);
             _currentScope = scope;
-            Records.Add(new ScopeStart(name, _scopes.Count, _stopwatch.Elapsed));
+            Records.Add(new ScopeStart(name, _currentScope.FullName, _scopes.Count, _stopwatch.Elapsed));
             return scope;
         }
 
@@ -42,40 +42,43 @@ namespace Juice.Measurement.Internal
         {
             if (_currentScope != null)
             {
-                Records.Add(new Checkpoint(name, _scopes.Count, _currentScope.CheckpointTime));
+                Records.Add(new Checkpoint(name, _currentScope.FullName, _scopes.Count, _currentScope.CheckpointTime));
             }
         }
 
         private static readonly string[] _header = ["Scope", "Depth", "Elapsed Time"];
         private static readonly ColAlign[] _colsAlign = [ColAlign.left, ColAlign.center, ColAlign.right];
 
-        public string ToString(bool humanReadable, int? maxDepth = default)
+        /// <inheritdoc />
+        public string ToString(bool humanReadable, int? maxDepth = default, bool checkpoint = true)
         {
             // Create a table to display the execution records.
             var table = new ConsoleTable([_header],
-                Records.Where(r => !maxDepth.HasValue || r.Depth <= maxDepth)
+                Records
+                .Where(r => !maxDepth.HasValue || r.Depth <= maxDepth)
+                .Where(r => checkpoint || r is not Internal.Checkpoint)
                 .SelectMany(r => new string[][]
                     {
-                        ([NamePrefix(r) + r.Name, r.Depth.ToString(), ElapsedTimeString(r, humanReadable)])
+                        ([Name(r), r.Depth.ToString(), ElapsedTime(r, humanReadable)])
                     })
                 .Concat([[], ["Total", "", ElapsedTimeToString(_stopwatch.Elapsed, humanReadable)]]).ToArray());
 
-            var maxLen = Records.Max(r => r.Name.Length + r.Depth);
+            var maxLen = Records.Max(r => r.Name.Length + r.Depth + 2); // 2 for the prefix
             table.Cols = [maxLen + 2, 10, 20];
             table.ColsAlign = _colsAlign;
             return table.PrintTable();
         }
 
-        private static string NamePrefix(ITrackRecord r)
+        private static string Name(ITrackRecord r)
         {
             return r switch
             {
-                Internal.ScopeStart => new string(' ', r.Depth - 1) + "» ",
+                Internal.ScopeStart => new string(' ', r.Depth - 1) + "« ",
                 Internal.Checkpoint => new string(' ', r.Depth) + "✓ ",
-                _ => new string(' ', r.Depth - 1)
-            };
+                _ => new string(' ', r.Depth - 1) + "» "
+            } + r.Name;
         }
-        private static string ElapsedTimeString(ITrackRecord r, bool humanReadable)
+        private static string ElapsedTime(ITrackRecord r, bool humanReadable)
         {
             return r switch
             {
@@ -87,7 +90,7 @@ namespace Juice.Measurement.Internal
         private static string ElapsedTimeToString(TimeSpan elapsed, bool humanReadable, string prefix = "")
         {
             return prefix + (humanReadable ? (elapsed.TotalMilliseconds >= 1 ? string.Format("{0:F2} ms", elapsed.TotalMilliseconds)
-                : string.Format("{0:F2} µs", elapsed.TotalMicroseconds)) : elapsed.ToString());
+                : string.Format("{0} µs", elapsed.TotalMicroseconds)) : elapsed.ToString());
         }
 
         override public string ToString()
@@ -95,7 +98,7 @@ namespace Juice.Measurement.Internal
             return ToString(true);
         }
 
-        private string GetScopeName()
+        private string GetScopeFullName()
         {
             return string.Join(" > ", _scopesName.Reverse());
         }
