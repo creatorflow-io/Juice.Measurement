@@ -73,7 +73,7 @@ namespace Juice.Measurement.Internal
             return r switch
             {
                 Internal.ScopeStart => new string(' ', r.Depth - 1) + "« ",
-                Internal.Checkpoint => new string(' ', r.Depth) + "✓ ",
+                Internal.Checkpoint => new string(' ', r.Depth) + "› ",
                 _ => new string(' ', r.Depth - 1) + "» "
             } + r.Name;
         }
@@ -81,7 +81,7 @@ namespace Juice.Measurement.Internal
         {
             return r switch
             {
-                Internal.ScopeStart => ElapsedTimeToString(r.ElapsedTime, humanReadable, "▻  "),
+                Internal.ScopeStart => ElapsedTimeToString(r.ElapsedTime, humanReadable, "›  "),
                 Internal.Checkpoint => ElapsedTimeToString(r.ElapsedTime, humanReadable, "+ "),
                 _ => ElapsedTimeToString(r.ElapsedTime, humanReadable)
             };
