@@ -72,7 +72,7 @@ namespace Juice.Measurement.Internal
 
             var nameMaxLength = Records.Max(r => r.Name.Length + r.Depth + 2); // 2 for the prefix
             var timeMaxLength = records.Max(r => r[3].Length + 2);
-            table.Cols = [nameMaxLength + 2, 10, humanReadable ? 15 : 18, timeMaxLength];
+            table.Cols = [nameMaxLength + 2, 10, humanReadable ? 15 : 20, timeMaxLength];
             table.ColsAlign = _colsAlign;
             return table.PrintTable();
         }
