@@ -13,7 +13,7 @@ namespace Juice.Measurement.Internal
         public string Name => _scopeName;
         public string FullName => _scopeFullName;
         public TimeSpan ElapsedTime => _stopwatch?.Elapsed ?? TimeSpan.Zero;
-        public TimeSpan CheckpointTime
+        private TimeSpan CheckpointTime
         {
             get
             {
@@ -30,6 +30,8 @@ namespace Juice.Measurement.Internal
             _scopeName = scopeName;
             _scopeFullName = scopeFullName;
         }
+
+        public Checkpoint Checkpoint(string name, int depth, TimeSpan start) => new(name, _scopeFullName, depth, start, CheckpointTime);
 
         private bool _disposedValue;
 

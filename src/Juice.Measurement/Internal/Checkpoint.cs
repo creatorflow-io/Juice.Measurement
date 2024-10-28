@@ -1,4 +1,4 @@
 ﻿namespace Juice.Measurement.Internal
 {
-    public record Checkpoint(string Name, string FullName, int Depth, TimeSpan ElapsedTime) : ITrackRecord;
+    public record Checkpoint(string Name, string FullName, int Depth, TimeSpan RecordTime, TimeSpan LocalTime) : ITrackRecord;
 }

@@ -20,15 +20,18 @@ namespace Juice.Measurement.Test
         public async Task TimeTracker_shouldAsync()
         {
             ITimeTracker timeTracker = new TimeTracker();
+            timeTracker.Checkpoint("Start");
             using (timeTracker.BeginScope("Test"))
             {
                 // Do something
+                timeTracker.Checkpoint("Checkpoint 0.0");
                 await Task.Delay(12);
-                timeTracker.Checkpoint("Checkpoint 0");
+                timeTracker.Checkpoint("Checkpoint 0.1");
 
                 using (timeTracker.BeginScope("Inner Test"))
                 {
                     // Do something
+                    timeTracker.Checkpoint("Checkpoint 1.0");
                     await Task.Delay(15);
 
                     using (timeTracker.BeginScope("Inner Inner Test"))
@@ -43,20 +46,31 @@ namespace Juice.Measurement.Test
                 using (timeTracker.BeginScope("Inner Test 2"))
                 {
                     // Do something
+                    timeTracker.Checkpoint("Checkpoint 1.3.0");
                     await Task.Delay(10);
-                    timeTracker.Checkpoint("Checkpoint 1.3");
+                    timeTracker.Checkpoint("Checkpoint 1.3.1");
                     timeTracker.Checkpoint("Checkpoint 1.4");
                 }
             }
+            timeTracker.Checkpoint("End");
+
+            using var timeTracker2 = new TimeTracker();
+            using var _ = timeTracker2.BeginScope("Test 2");
             _output.WriteLine(timeTracker.ToString());
+            timeTracker2.Checkpoint("ToString");
             _output.WriteLine(timeTracker.ToString(false, 2));
+            timeTracker2.Checkpoint("ToString 2");
             _output.WriteLine(timeTracker.ToString(true, 2, false));
-            _output.WriteLine("Longest run: " + timeTracker.Records.Where(r => r.Depth > 1).MaxBy(r => r.ElapsedTime));
-            timeTracker.Records.Should().Contain(c => c.Name == "Checkpoint 0");
-            timeTracker.Records.Should().Contain(c => c.Name == "Checkpoint 1");
+            timeTracker2.Checkpoint("ToString 3");
+            _.Dispose();
+            _output.WriteLine(timeTracker2.ToString());
+            timeTracker.Records.Should().Contain(c => c.Name == "Start");
+            timeTracker.Records.Should().Contain(c => c.Name == "End");
+            timeTracker.Records.Should().Contain(c => c.Name == "Checkpoint 0.0");
+            timeTracker.Records.Should().Contain(c => c.Name == "Checkpoint 1.0");
             timeTracker.Records.Should().Contain(c => c.Name == "Checkpoint 1.1");
             timeTracker.Records.Should().Contain(c => c.Name == "Checkpoint 1.2");
-            timeTracker.Records.Should().Contain(c => c.Name == "Checkpoint 1.3");
+            timeTracker.Records.Should().Contain(c => c.Name == "Checkpoint 1.3.1");
             timeTracker.Records.Should().Contain(c => c.Name == "Checkpoint 1.4");
 
             timeTracker.Records.Should().Contain(r => r.Name == "Test");

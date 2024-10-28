@@ -13,7 +13,7 @@ namespace Juice.Measurement.Internal
         private ExecutionScope? _currentScope;
 
         private Stack<string> _scopesName = new();
-        public List<ITrackRecord> Records { get; } = new();
+        public List<ITrackRecord> Records { get; } = [];
 
         /// <inheritdoc />
         public IDisposable BeginScope(string name)
@@ -24,15 +24,17 @@ namespace Juice.Measurement.Internal
             {
                 if (sender is ExecutionScope scope)
                 {
-                    Records.Add(new ScopeEnd(scope.Name, scope.FullName, _scopesName.Count, scope.ElapsedTime));
+                    Records.Add(new ScopeEnd(scope.Name, scope.FullName, _scopesName.Count-1, _stopwatch.Elapsed, scope.ElapsedTime));
                 }
                 _scopesName.Pop();
                 _scopes.Pop();
                 _currentScope = _scopes.Count > 0 ? _scopes.Peek() : null;
             };
             _scopes.Push(scope);
+
+            Records.Add(new ScopeStart(name, scope.FullName, _scopes.Count-1, _stopwatch.Elapsed, _currentScope?.ElapsedTime ?? _stopwatch.Elapsed));
             _currentScope = scope;
-            Records.Add(new ScopeStart(name, _currentScope.FullName, _scopes.Count, _stopwatch.Elapsed));
+
             return scope;
         }
 
@@ -41,54 +43,64 @@ namespace Juice.Measurement.Internal
         {
             if (_currentScope != null)
             {
-                Records.Add(new Checkpoint(name, _currentScope.FullName, _scopes.Count, _currentScope.CheckpointTime));
+                Records.Add(_currentScope.Checkpoint(name, _scopes.Count, _stopwatch.Elapsed));
+            }
+            else
+            {
+                Records.Add(new Checkpoint(name, GetScopeFullName(), _scopes.Count, _stopwatch.Elapsed, _stopwatch.Elapsed));
             }
         }
 
-        private static readonly string[] _header = ["Scope", "Depth", "Elapsed Time"];
-        private static readonly ColAlign[] _colsAlign = [ColAlign.left, ColAlign.center, ColAlign.right];
+        private static readonly string[] _header = ["Scope", "Depth", "Time Line", "Elapsed Time"];
+        private static readonly ColAlign[] _colsAlign = [ColAlign.left, ColAlign.center, ColAlign.left, ColAlign.left];
 
         /// <inheritdoc />
         public string ToString(bool humanReadable, int? maxDepth = default, bool checkpoint = true)
         {
             // Create a table to display the execution records.
-            var table = new ConsoleTable([_header],
-                Records
+            var records = Records
                 .Where(r => !maxDepth.HasValue || r.Depth <= maxDepth)
                 .Where(r => checkpoint || r is not Internal.Checkpoint)
                 .SelectMany(r => new string[][]
                     {
-                        ([Name(r), r.Depth.ToString(), ElapsedTime(r, humanReadable)])
-                    })
-                .Concat([[], ["Total", "", ElapsedTimeToString(_stopwatch.Elapsed, humanReadable)]]).ToArray());
+                        ([Name(r), r.Depth.ToString(), TimeLine(r, humanReadable), ElapsedTime(r, humanReadable)])
+                    });
 
-            var maxLen = Records.Max(r => r.Name.Length + r.Depth + 2); // 2 for the prefix
-            table.Cols = [maxLen + 2, 10, 20];
+            var table = new ConsoleTable([_header],
+                records
+                .Concat([[], ["Total", "", "", ElapsedTimeToString(_stopwatch.Elapsed, humanReadable)]]).ToArray());
+
+            var nameMaxLength = Records.Max(r => r.Name.Length + r.Depth + 2); // 2 for the prefix
+            var timeMaxLength = records.Max(r => r[3].Length + 2);
+            table.Cols = [nameMaxLength + 2, 10, humanReadable ? 15 : 18, timeMaxLength];
             table.ColsAlign = _colsAlign;
             return table.PrintTable();
         }
 
         private static string Name(ITrackRecord r)
         {
-            return r switch
+            return new string(' ', r.Depth) + r switch
             {
-                Internal.ScopeStart => new string(' ', r.Depth - 1) + "« ",
-                Internal.Checkpoint => new string(' ', r.Depth) + "› ",
-                _ => new string(' ', r.Depth - 1) + "» "
+                ScopeStart => "« ",
+                Checkpoint check => "› ",
+                _ =>  "» "
             } + r.Name;
         }
+
+        private static string TimeLine(ITrackRecord r, bool humanReadable) => ElapsedTimeToString(r.RecordTime, humanReadable, "› ", 3);
         private static string ElapsedTime(ITrackRecord r, bool humanReadable)
         {
             return r switch
             {
-                Internal.ScopeStart => ElapsedTimeToString(r.ElapsedTime, humanReadable, "›  "),
-                Internal.Checkpoint => ElapsedTimeToString(r.ElapsedTime, humanReadable, "+ "),
-                _ => ElapsedTimeToString(r.ElapsedTime, humanReadable)
+                Checkpoint check => new string(' ', r.Depth) + ElapsedTimeToString(check.LocalTime, humanReadable, "+ "),
+                ScopeStart start => new string(' ', r.Depth) + ElapsedTimeToString(start.LocalTime, humanReadable, "+ "),
+                ScopeEnd end => new string(' ', r.Depth) + ElapsedTimeToString(end.ElapsedTime, humanReadable),
+                _ => ""
             };
         }
-        private static string ElapsedTimeToString(TimeSpan elapsed, bool humanReadable, string prefix = "")
+        private static string ElapsedTimeToString(TimeSpan elapsed, bool humanReadable, string prefix = "", int nums=1)
         {
-            return prefix + (humanReadable ? (elapsed.TotalMilliseconds >= 1 ? string.Format("{0:F2} ms", elapsed.TotalMilliseconds)
+            return prefix + (humanReadable ? (elapsed.TotalMilliseconds >= 1 ? string.Format($"{{0:F{nums}}} ms", elapsed.TotalMilliseconds)
                 : string.Format("{0} µs", elapsed.TotalMicroseconds)) : elapsed.ToString());
         }
 
