@@ -15,6 +15,8 @@ namespace Juice.Measurement.Internal
         private Stack<string> _scopesName = new();
         public List<ITrackRecord> Records { get; } = [];
 
+        public TimeSpan ElapsedTime => _stopwatch.Elapsed;
+
         /// <inheritdoc />
         public IDisposable BeginScope(string name)
         {
@@ -63,12 +65,12 @@ namespace Juice.Measurement.Internal
                 .Where(r => checkpoint || r is not Internal.Checkpoint)
                 .SelectMany(r => new string[][]
                     {
-                        ([Name(r), r.Depth.ToString(), TimeLine(r, humanReadable), ElapsedTime(r, humanReadable)])
+                        ([Name(r), r.Depth.ToString(), TimeLine(r, humanReadable), ElapsedTimeString(r, humanReadable)])
                     });
 
             var table = new ConsoleTable([_header],
                 records
-                .Concat([[], ["Total", "", "", ElapsedTimeToString(_stopwatch.Elapsed, humanReadable)]]).ToArray());
+                .Concat([[], ["Total", "", "", ElapsedTimeToString(ElapsedTime, humanReadable)]]).ToArray());
 
             var nameMaxLength = Records.Max(r => r.Name.Length + r.Depth + 2); // 2 for the prefix
             var timeMaxLength = records.Max(r => r[3].Length + 2);
@@ -88,7 +90,7 @@ namespace Juice.Measurement.Internal
         }
 
         private static string TimeLine(ITrackRecord r, bool humanReadable) => ElapsedTimeToString(r.RecordTime, humanReadable, "› ", 3);
-        private static string ElapsedTime(ITrackRecord r, bool humanReadable)
+        private static string ElapsedTimeString(ITrackRecord r, bool humanReadable)
         {
             return r switch
             {

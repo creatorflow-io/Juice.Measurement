@@ -4,6 +4,7 @@ namespace Juice.Measurement
 {
     public interface ITimeTracker: IDisposable
     {
+        TimeSpan ElapsedTime { get; }
         /// <summary>
         /// Execution records.
         /// </summary>
