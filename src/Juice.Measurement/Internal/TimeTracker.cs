@@ -8,14 +8,14 @@ namespace Juice.Measurement.Internal
     /// </summary>
 	public class TimeTracker : ITimeTracker
     {
-        private Stopwatch _stopwatch = Stopwatch.StartNew();
         private Stack<ExecutionScope> _scopes = new();
+        private ExecutionScope _rootScope = new("root", "");
         private ExecutionScope? _currentScope;
 
         private Stack<string> _scopesName = new();
         public List<ITrackRecord> Records { get; } = [];
 
-        public TimeSpan ElapsedTime => _stopwatch.Elapsed;
+        public TimeSpan ElapsedTime => _rootScope.ElapsedTime;
 
         /// <inheritdoc />
         public IDisposable BeginScope(string name)
@@ -26,15 +26,19 @@ namespace Juice.Measurement.Internal
             {
                 if (sender is ExecutionScope scope)
                 {
-                    Records.Add(new ScopeEnd(scope.Name, scope.FullName, _scopesName.Count-1, _stopwatch.Elapsed, scope.ElapsedTime));
+                    Records.Add(new ScopeEnd(scope.Name, scope.FullName, _scopesName.Count-1, ElapsedTime, scope.ElapsedTime));
                 }
                 _scopesName.Pop();
                 _scopes.Pop();
                 _currentScope = _scopes.Count > 0 ? _scopes.Peek() : null;
+                if(_currentScope != null)
+                {
+                    var _ = _rootScope.CheckpointTime;
+                }
             };
             _scopes.Push(scope);
 
-            Records.Add(new ScopeStart(name, scope.FullName, _scopes.Count-1, _stopwatch.Elapsed, _currentScope?.ElapsedTime ?? _stopwatch.Elapsed));
+            Records.Add(new ScopeStart(name, scope.FullName, _scopes.Count-1, ElapsedTime, _currentScope?.ElapsedTime ?? _rootScope.CheckpointTime));
             _currentScope = scope;
 
             return scope;
@@ -45,11 +49,11 @@ namespace Juice.Measurement.Internal
         {
             if (_currentScope != null)
             {
-                Records.Add(_currentScope.Checkpoint(name, _scopes.Count, _stopwatch.Elapsed));
+                Records.Add(_currentScope.Checkpoint(name, _scopes.Count, ElapsedTime));
             }
             else
             {
-                Records.Add(new Checkpoint(name, GetScopeFullName(), _scopes.Count, _stopwatch.Elapsed, _stopwatch.Elapsed));
+                Records.Add(new Checkpoint(name, GetScopeFullName(), _scopes.Count, ElapsedTime, _rootScope.CheckpointTime));
             }
         }
 
@@ -127,7 +131,7 @@ namespace Juice.Measurement.Internal
                     _scopesName.Clear();
                     _scopes.Clear();
                     _currentScope = null;
-                    _stopwatch.Stop();
+                    _rootScope.Dispose();
                     Records.Clear();
                 }
 

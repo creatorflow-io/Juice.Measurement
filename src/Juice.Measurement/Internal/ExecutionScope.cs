@@ -13,7 +13,7 @@ namespace Juice.Measurement.Internal
         public string Name => _scopeName;
         public string FullName => _scopeFullName;
         public TimeSpan ElapsedTime => _stopwatch?.Elapsed ?? TimeSpan.Zero;
-        private TimeSpan CheckpointTime
+        public TimeSpan CheckpointTime
         {
             get
             {
