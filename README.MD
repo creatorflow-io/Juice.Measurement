@@ -36,26 +36,31 @@ You can use it with new transient instance to meansure inside a class, method, o
     Console.WriteLine(timeTracker.ToString());
 
     // Output:
-     _______________________________________________________
-    |         Scope         |  Depth   |    Elapsed Time    |
-    |-------------------------------------------------------|
-    | « Test                |    1     |        ›  429.7 µs |
-    |  › Checkpoint 0       |    1     |         + 16.21 ms |
-    |  « Inner Test         |    2     |        ›  16.67 ms |
-    |   « Inner Inner Test  |    3     |        ›  31.08 ms |
-    |    › Checkpoint 1.1   |    3     |           + 4.2 µs |
-    |    › Checkpoint 1.2   |    3     |         + 31.89 ms |
-    |   » Inner Inner Test  |    3     |           32.10 ms |
-    |  » Inner Test         |    2     |           46.77 ms |
-    |  › Checkpoint 1       |    1     |         + 46.83 ms |
-    |  « Inner Test 2       |    2     |        ›  63.46 ms |
-    |   › Checkpoint 1.3    |    2     |         + 15.07 ms |
-    |   › Checkpoint 1.4    |    2     |           + 2.1 µs |
-    |  » Inner Test 2       |    2     |           15.07 ms |
-    | » Test                |    1     |           78.13 ms |
-    |-------------------------------------------------------|
-    | Total                 |          |           79.36 ms |
-    '-------------------------------------------------------'
+ ________________________________________________________________
+|        Scope         |  Depth   |   Time Line   | Elapsed Time |
+|----------------------------------------------------------------|
+| › Start              |    0     | › 334.2 µs    | + 367.3 µs   |
+| « Test               |    0     | › 602.5 µs    | + 234.3 µs   |
+|  › Checkpoint 0.0    |    1     | › 635.3 µs    |  + 83.1 µs   |
+|  › Checkpoint 0.1    |    1     | › 5.974 ms    |  + 5.3 ms    |
+|  « Inner Test        |    1     | › 5.991 ms    |  + 5.4 ms    |
+|   › Checkpoint 1.0   |    2     | › 5.992 ms    |   + 1.5 µs   |
+|   « Inner Inner Test |    2     | › 20.637 ms   |   + 14.6 ms  |
+|    › Checkpoint 1.1  |    3     | › 20.637 ms   |    + 1.3 µs  |
+|    › Checkpoint 1.2  |    3     | › 52.464 ms   |    + 31.8 ms |
+|   » Inner Inner Test |    2     | › 52.931 ms   |   32.1 ms    |
+|  » Inner Test        |    1     | › 53.001 ms   |  47.0 ms     |
+|  › Checkpoint 1      |    1     | › 53.002 ms   |  + 47.0 ms   |
+|  « Inner Test 2      |    1     | › 53.020 ms   |  + 52.4 ms   |
+|   › Checkpoint 1.3.0 |    2     | › 53.021 ms   |   + 7.3 µs   |
+|   › Checkpoint 1.3.1 |    2     | › 68.046 ms   |   + 15.0 ms  |
+|   › Checkpoint 1.4   |    2     | › 68.051 ms   |   + 4.5 µs   |
+|  » Inner Test 2      |    1     | › 68.054 ms   |  15.0 ms     |
+| » Test               |    0     | › 68.059 ms   | 67.5 ms      |
+| › End                |    0     | › 68.077 ms   | + 18.9 µs    |
+|----------------------------------------------------------------|
+| Total                |          |               | 68.9 ms      |
+'----------------------------------------------------------------'
 ```
 
 Inside the **Elapsed Time** column:
