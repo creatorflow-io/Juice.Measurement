@@ -70,6 +70,7 @@ Inside the **Elapsed Time** column:
 ### Measurement time store
 
 Store recorded scopes if the `scopeId` and `traceId` have specified, and you can get the details of the scope by the `scopeId` and `traceId`.
+It may take more time on the request processing to store the data in the database (often 5 ~ 50 ms), so it is recommended to use it in the background or conditional.
 
 ```csharp
 // program.cs
