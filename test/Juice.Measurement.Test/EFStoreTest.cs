@@ -9,13 +9,8 @@ using Microsoft.Extensions.Logging;
 using Juice.Measurement.Stores.EF;
 using Juice.EF.Extensions;
 using Juice.Services;
-using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Juice.Measurement.Test.Helpers;
-using Juice.Measurement.Stores;
-using System.Collections.Generic;
-using System.Linq;
-using Google.Protobuf.WellKnownTypes;
 
 namespace Juice.Measurement.Test
 {
