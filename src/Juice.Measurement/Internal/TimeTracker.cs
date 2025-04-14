@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Juice.Utils;
+﻿using Juice.Utils;
 
 namespace Juice.Measurement.Internal
 {
@@ -8,33 +7,40 @@ namespace Juice.Measurement.Internal
     /// </summary>
 	public class TimeTracker : ITimeTracker
     {
-        private Stopwatch _stopwatch = Stopwatch.StartNew();
         private Stack<ExecutionScope> _scopes = new();
+        private ExecutionScope _rootScope = new("root", "", default);
         private ExecutionScope? _currentScope;
 
         private Stack<string> _scopesName = new();
         public List<ITrackRecord> Records { get; } = [];
 
-        public TimeSpan ElapsedTime => _stopwatch.Elapsed;
+        public TimeSpan ElapsedTime => _rootScope.ElapsedTime;
 
         /// <inheritdoc />
-        public IDisposable BeginScope(string name)
+        public IDisposable BeginScope(string name, string? scopeId = default)
         {
             _scopesName.Push(name);
-            var scope = new ExecutionScope(name, GetScopeFullName());
+            var scope = new ExecutionScope(name, GetScopeFullName(), scopeId);
             scope.OnDispose += (sender, args) =>
             {
                 if (sender is ExecutionScope scope)
                 {
-                    Records.Add(new ScopeEnd(scope.Name, scope.FullName, _scopesName.Count-1, _stopwatch.Elapsed, scope.ElapsedTime));
+                    Records.Add(new ScopeEnd(scope.Name, scope.FullName, _scopesName.Count - 1,
+                        _rootScope.ElapsedTime, scope.ElapsedTime, scope.ScopeId));
                 }
                 _scopesName.Pop();
                 _scopes.Pop();
                 _currentScope = _scopes.Count > 0 ? _scopes.Peek() : null;
+                if (_currentScope == null)
+                {
+                    // Reset the checkpoint time.
+                    _ = _rootScope.CheckpointTime;
+                }
             };
             _scopes.Push(scope);
 
-            Records.Add(new ScopeStart(name, scope.FullName, _scopes.Count-1, _stopwatch.Elapsed, _currentScope?.ElapsedTime ?? _stopwatch.Elapsed));
+            Records.Add(new ScopeStart(name, scope.FullName, _scopes.Count - 1,
+                _rootScope.ElapsedTime, _currentScope?.ElapsedTime ?? _rootScope.CheckpointTime, scopeId));
             _currentScope = scope;
 
             return scope;
@@ -45,11 +51,11 @@ namespace Juice.Measurement.Internal
         {
             if (_currentScope != null)
             {
-                Records.Add(_currentScope.Checkpoint(name, _scopes.Count, _stopwatch.Elapsed));
+                Records.Add(_currentScope.Checkpoint(name, _scopes.Count, _rootScope.ElapsedTime));
             }
             else
             {
-                Records.Add(new Checkpoint(name, GetScopeFullName(), _scopes.Count, _stopwatch.Elapsed, _stopwatch.Elapsed));
+                Records.Add(new Checkpoint(name, GetScopeFullName(), _scopes.Count, _rootScope.ElapsedTime, _rootScope.CheckpointTime));
             }
         }
 
@@ -68,6 +74,11 @@ namespace Juice.Measurement.Internal
                         ([Name(r), r.Depth.ToString(), TimeLine(r, humanReadable), ElapsedTimeString(r, humanReadable)])
                     });
 
+            if(records.Count() == 0)
+            {
+                return "No records.";
+            }
+
             var table = new ConsoleTable([_header],
                 records
                 .Concat([[], ["Total", "", "", ElapsedTimeToString(ElapsedTime, humanReadable)]]).ToArray());
@@ -85,7 +96,7 @@ namespace Juice.Measurement.Internal
             {
                 ScopeStart => "« ",
                 Checkpoint check => "› ",
-                _ =>  "» "
+                _ => "» "
             } + r.Name;
         }
 
@@ -94,13 +105,13 @@ namespace Juice.Measurement.Internal
         {
             return r switch
             {
-                Checkpoint check => new string(' ', r.Depth) + ElapsedTimeToString(check.LocalTime, humanReadable, "+ "),
-                ScopeStart start => new string(' ', r.Depth) + ElapsedTimeToString(start.LocalTime, humanReadable, "+ "),
+                Checkpoint check => new string(' ', r.Depth) + ElapsedTimeToString(check.ElapsedTime, humanReadable, "+ "),
+                ScopeStart start => new string(' ', r.Depth) + ElapsedTimeToString(start.ElapsedTime, humanReadable, "+ "),
                 ScopeEnd end => new string(' ', r.Depth) + ElapsedTimeToString(end.ElapsedTime, humanReadable),
                 _ => ""
             };
         }
-        private static string ElapsedTimeToString(TimeSpan elapsed, bool humanReadable, string prefix = "", int nums=1)
+        private static string ElapsedTimeToString(TimeSpan elapsed, bool humanReadable, string prefix = "", int nums = 1)
         {
             return prefix + (humanReadable ? (elapsed.TotalMilliseconds >= 1 ? string.Format($"{{0:F{nums}}} ms", elapsed.TotalMilliseconds)
                 : string.Format("{0} µs", elapsed.TotalMicroseconds)) : elapsed.ToString());
@@ -127,7 +138,7 @@ namespace Juice.Measurement.Internal
                     _scopesName.Clear();
                     _scopes.Clear();
                     _currentScope = null;
-                    _stopwatch.Stop();
+                    _rootScope.Dispose();
                     Records.Clear();
                 }
 
@@ -144,4 +155,5 @@ namespace Juice.Measurement.Internal
         }
 
     }
+
 }

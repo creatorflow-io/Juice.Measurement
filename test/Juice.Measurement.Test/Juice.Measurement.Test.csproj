@@ -1,9 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
         <TargetFrameworks>$(AppTargetFramework)</TargetFrameworks>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
+        <UserSecretsId>6525e67e-6e87-4b7a-b806-619ea697793c</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
@@ -19,9 +20,35 @@
         </PackageReference>
         <PackageReference Include="FluentAssertions" Version="6.12.0" />
     </ItemGroup>
+    
+    <ItemGroup Label="Migrations">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="$(EFVersion)">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="$(EFVersion)">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Juice.XUnit" Version="$(JuiceVersion)" />
+        <PackageReference Label="Integration tests" Include="Microsoft.AspNetCore.Mvc.Testing" Version="$(MicrosoftExtensionsVersion)" />
+    </ItemGroup>
+    
+    <ItemGroup Label="gRPC">
+        <PackageReference Include="Grpc.AspNetCore" Version="$(GrpcVersion)" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\Juice.Measurement.Api\Juice.Measurement.Api.csproj" />
+      <ProjectReference Include="..\..\src\Juice.Measurement.Stores.EF.PostgreSQL\Juice.Measurement.Stores.EF.PostgreSQL.csproj" />
+      <ProjectReference Include="..\..\src\Juice.Measurement.Stores.EF.SqlServer\Juice.Measurement.Stores.EF.SqlServer.csproj" />
+      <ProjectReference Include="..\..\src\Juice.Measurement.Stores.EF\Juice.Measurement.Stores.EF.csproj" />
+      <ProjectReference Include="..\..\src\Juice.Measurement.Stores.Grpc\Juice.Measurement.Stores.Grpc.csproj" />
       <ProjectReference Include="..\..\src\Juice.Measurement\Juice.Measurement.csproj" />
+      <ProjectReference Include="..\Juice.Measurement.Host\Juice.Measurement.Host.csproj" />
     </ItemGroup>
 
 </Project>

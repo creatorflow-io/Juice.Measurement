@@ -21,7 +21,8 @@ namespace Juice.Measurement.Test
         {
             ITimeTracker timeTracker = new TimeTracker();
             timeTracker.Checkpoint("Start");
-            using (timeTracker.BeginScope("Test"))
+            var scopeId = "xunit.timetracker.scopeId";
+            using (timeTracker.BeginScope("Test", scopeId))
             {
                 // Do something
                 timeTracker.Checkpoint("Checkpoint 0.0");
@@ -77,7 +78,7 @@ namespace Juice.Measurement.Test
             timeTracker.Records.Should().Contain(r => r.Name == "Inner Test");
             timeTracker.Records.Should().Contain(r => r.Name == "Inner Inner Test");
             timeTracker.Records.Should().Contain(r => r.Name == "Inner Test 2");
-
+            timeTracker.Records.OfType<IScope>().Any(s => s.ScopeId== scopeId).Should().BeTrue();
         }
     }
 }

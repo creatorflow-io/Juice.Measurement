@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>$(AppTargetFramework)</TargetFrameworks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="Grpc.Net.ClientFactory" Version="$(GrpcVersion)" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\Juice.Measurement.Api.Contracts\Juice.Measurement.Api.Contracts.csproj" />
+      <ProjectReference Include="..\Juice.Measurement.Stores\Juice.Measurement.Stores.csproj" />
+    </ItemGroup>
+
+</Project>

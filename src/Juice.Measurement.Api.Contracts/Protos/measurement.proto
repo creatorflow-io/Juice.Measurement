@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+package juice.measurement.api.grpc;
+
+service TimeStore{
+    rpc Save(TimeData) returns(TimeStoreResult);
+    rpc GetSummary(Filter) returns(SummaryValue);
+    rpc GetRecords(Filter) returns(TimeRecords);
+}
+
+message TimeStoreResult{
+    bool succeeded = 1;
+    google.protobuf.StringValue message = 2;
+}
+
+message TimeData{
+    string traceId = 1;
+    string name = 2;
+    string scopeId = 3;
+    string summary = 4;
+    google.protobuf.Timestamp recordedDate = 5;
+    repeated TimeRecord records = 6;
+}
+
+message TimeRecord{
+    string name = 1;
+    string fullName = 2;
+    string scopeId = 3;
+    google.protobuf.Duration started = 4;
+    google.protobuf.Duration elapsed = 5;
+}
+
+message TimeRecords{
+    repeated TimeRecord records = 1;
+    optional google.protobuf.Timestamp recordedDate = 2;
+}
+
+message Filter{
+    string traceId = 1;
+}
+
+message Summary{
+    string traceId = 1;
+    string name = 2;
+    string scopeId = 3;
+    string summary = 4;
+    google.protobuf.Timestamp recordedDate = 5;
+}
+
+message SummaryValue{
+    Summary value = 1;
+}

@@ -2,7 +2,7 @@
 
 namespace Juice.Measurement.Internal
 {
-    internal class ExecutionScope : IDisposable
+    internal class ExecutionScope : IScope, IDisposable
     {
         public EventHandler? OnDispose;
         private Stopwatch? _stopwatch;
@@ -12,8 +12,14 @@ namespace Juice.Measurement.Internal
 
         public string Name => _scopeName;
         public string FullName => _scopeFullName;
+        /// <summary>
+        /// Total elapsed time.
+        /// </summary>
         public TimeSpan ElapsedTime => _stopwatch?.Elapsed ?? TimeSpan.Zero;
-        private TimeSpan CheckpointTime
+        /// <summary>
+        /// Get the time since the last checkpoint.
+        /// </summary>
+        public TimeSpan CheckpointTime
         {
             get
             {
@@ -23,12 +29,15 @@ namespace Juice.Measurement.Internal
             }
         }
 
-        public ExecutionScope(string scopeName, string scopeFullName)
+        public string? ScopeId { get; init; }
+
+        public ExecutionScope(string scopeName, string scopeFullName, string? scopeId)
         {
             _stopwatch = Stopwatch.StartNew();
             _checkpoint = Stopwatch.StartNew();
             _scopeName = scopeName;
             _scopeFullName = scopeFullName;
+            ScopeId = scopeId;
         }
 
         public Checkpoint Checkpoint(string name, int depth, TimeSpan start) => new(name, _scopeFullName, depth, start, CheckpointTime);
