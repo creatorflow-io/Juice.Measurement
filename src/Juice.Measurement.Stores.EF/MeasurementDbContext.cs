@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Juice.Measurement.Stores.EF
 {
-    public class MeasurementDbContext(DbContextOptions<MeasurementDbContext> options) : DbContext(options), ISchemaDbContext
+    public class MeasurementDbContext : DbContext, ISchemaDbContext
     {
         public DbSet<TimeRecord> TimeRecords { get; set; }
         public DbSet<TimeSummary> TimeSummaries { get; set; }
@@ -24,6 +24,11 @@ namespace Juice.Measurement.Stores.EF
         public void SetTimeTracker(ITimeTracker? tracker)
         {
             _tracker = tracker;
+        }
+
+        public MeasurementDbContext(DbContextOptions<MeasurementDbContext> options)
+            : base(options)
+        {
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

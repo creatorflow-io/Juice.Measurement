@@ -12,7 +12,7 @@ namespace Juice.Measurement.Internal
         private ExecutionScope? _currentScope;
 
         private Stack<string> _scopesName = new();
-        public List<ITrackRecord> Records { get; } = [];
+        public List<ITrackRecord> Records { get; } = new();
 
         public TimeSpan ElapsedTime => _rootScope.ElapsedTime;
 
@@ -59,8 +59,8 @@ namespace Juice.Measurement.Internal
             }
         }
 
-        private static readonly string[] _header = ["Scope", "Depth", "Time Line", "Elapsed Time"];
-        private static readonly ColAlign[] _colsAlign = [ColAlign.left, ColAlign.center, ColAlign.left, ColAlign.left];
+        private static readonly string[] _header = new string[] { "Scope", "Depth", "Time Line", "Elapsed Time" };
+        private static readonly ColAlign[] _colsAlign = new ColAlign[] { ColAlign.left, ColAlign.center, ColAlign.left, ColAlign.left };
 
         /// <inheritdoc />
         public string ToString(bool humanReadable, int? maxDepth = default, bool checkpoint = true)
@@ -71,7 +71,7 @@ namespace Juice.Measurement.Internal
                 .Where(r => checkpoint || r is not Internal.Checkpoint)
                 .SelectMany(r => new string[][]
                     {
-                        ([Name(r), r.Depth.ToString(), TimeLine(r, humanReadable), ElapsedTimeString(r, humanReadable)])
+                        (new string[]{Name(r), r.Depth.ToString(), TimeLine(r, humanReadable), ElapsedTimeString(r, humanReadable) })
                     });
 
             if(records.Count() == 0)
@@ -79,13 +79,13 @@ namespace Juice.Measurement.Internal
                 return "No records.";
             }
 
-            var table = new ConsoleTable([_header],
+            var table = new ConsoleTable(new string[][] { _header },
                 records
-                .Concat([[], ["Total", "", "", ElapsedTimeToString(ElapsedTime, humanReadable)]]).ToArray());
+                .Concat(new string[][] { new string[0], new string[] { "Total", "", "", ElapsedTimeToString(ElapsedTime, humanReadable) } }).ToArray());
 
             var nameMaxLength = Records.Max(r => r.Name.Length + r.Depth + 2); // 2 for the prefix
             var timeMaxLength = records.Max(r => r[3].Length + 2);
-            table.Cols = [nameMaxLength + 2, 10, humanReadable ? 15 : 20, timeMaxLength];
+            table.Cols = new int[] { nameMaxLength + 2, 10, humanReadable ? 15 : 20, timeMaxLength };
             table.ColsAlign = _colsAlign;
             return table.PrintTable();
         }
@@ -113,8 +113,13 @@ namespace Juice.Measurement.Internal
         }
         private static string ElapsedTimeToString(TimeSpan elapsed, bool humanReadable, string prefix = "", int nums = 1)
         {
+#if NET8_0_OR_GREATER
             return prefix + (humanReadable ? (elapsed.TotalMilliseconds >= 1 ? string.Format($"{{0:F{nums}}} ms", elapsed.TotalMilliseconds)
                 : string.Format("{0} µs", elapsed.TotalMicroseconds)) : elapsed.ToString());
+#else
+            return prefix + (humanReadable ? (elapsed.TotalMilliseconds >= 1 ? string.Format($"{{0:F{nums}}} ms", elapsed.TotalMilliseconds)
+                : string.Format("{0} ms", elapsed.TotalMilliseconds)) : elapsed.ToString(@"hh\:mm\:ss\.fff"));
+#endif
         }
 
         override public string ToString()

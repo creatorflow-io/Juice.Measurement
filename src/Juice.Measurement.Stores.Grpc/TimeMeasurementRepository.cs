@@ -3,24 +3,23 @@ using Juice.Measurement.Api.Grpc;
 
 namespace Juice.Measurement.Stores.Grpc
 {
-    internal class TimeMeasurementRepository(TimeStore.TimeStoreClient client, ITimeTracker? tracker = default) : ITimeRepository
+    internal class TimeMeasurementRepository: ITimeRepository
     {
-        private readonly TimeStore.TimeStoreClient _client = client;
+        private readonly TimeStore.TimeStoreClient _client;
+        private readonly ITimeTracker? _tracker;
+
+        public TimeMeasurementRepository(TimeStore.TimeStoreClient client, ITimeTracker? tracker = default)
+        {
+            _client = client ?? throw new ArgumentNullException(nameof(client));
+            _tracker = tracker;
+        }
 
         public async Task<IEnumerable<TimeRecord>> GetTimeRecordsAsync(string traceId, CancellationToken token)
         {
             var request = new Filter { TraceId = traceId };
             var response = await _client.GetRecordsAsync(request, cancellationToken: token);
-            return response.Records.Select(x => new TimeRecord
-            {
-                Name = x.Name,
-                FullName = x.FullName,
-                StartedTime = x.Started.ToTimeSpan(),
-                ElapsedTime = x.Elapsed.ToTimeSpan(),
-                RecordedDate = response.RecordedDate.ToDateTimeOffset(),
-                ScopeId = x.ScopeId,
-                TraceId = traceId
-            });
+            return response.Records.Select(x =>
+                new TimeRecord(x.Name, x.FullName, x.Started.ToTimeSpan(), x.Elapsed.ToTimeSpan(), x.ScopeId, traceId, response.RecordedDate.ToDateTimeOffset()));
         }
 
         public async Task<TimeSummary?> GetTimeSummaryAsync(string traceId)
@@ -38,7 +37,7 @@ namespace Juice.Measurement.Stores.Grpc
 
         public async Task SaveTrackDataAsync(TimeSummary summary, IEnumerable<TimeRecord> records)
         {
-            using var _ = tracker?.BeginScope("Save track data", "timetracker.stores.grpc.save");
+            using var _ = _tracker?.BeginScope("Save track data", "timetracker.stores.grpc.save");
             var data = new TimeData
             {
                 Name = summary.Name,

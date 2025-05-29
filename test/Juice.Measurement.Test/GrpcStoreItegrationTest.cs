@@ -14,10 +14,18 @@ using Juice.Measurement.Test.Helpers;
 
 namespace Juice.Measurement.Test
 {
-    public class GrpcStoreItegrationTest(WebApplicationFactory<Program> factory, ITestOutputHelper output)
+    public class GrpcStoreItegrationTest
                 : IClassFixture<WebApplicationFactory<Program>>
     {
-        private readonly ITestOutputHelper _output = output;
+        private readonly ITestOutputHelper _output;
+
+        private readonly WebApplicationFactory<Program> _factory;
+
+        public GrpcStoreItegrationTest(WebApplicationFactory<Program> factory, ITestOutputHelper output)
+        {
+            _factory = factory;
+            _output = output;
+        }
 
         [IgnoreOnCIFact(DisplayName = "Persist gRPC store")]
         public async Task Measured_should_persist_grpc_Async()
@@ -26,7 +34,7 @@ namespace Juice.Measurement.Test
             {
                 CurrentDirectory = AppContext.BaseDirectory
             };
-            var client = factory.CreateClient();
+            var client = _factory.CreateClient();
 
             resolver.ConfigureServices(services =>
             {
@@ -48,10 +56,10 @@ namespace Juice.Measurement.Test
 
                 services.AddMeasurementGrpcStores(options =>
                 {
-                    options.Address = factory.Server.BaseAddress;
+                    options.Address = _factory.Server.BaseAddress;
                     options.ChannelOptionsActions.Add(channelOptions =>
                     {
-                        channelOptions.HttpHandler = factory.Server.CreateHandler();
+                        channelOptions.HttpHandler = _factory.Server.CreateHandler();
                     });
                 });
 

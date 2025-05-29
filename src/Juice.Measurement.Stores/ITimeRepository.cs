@@ -30,16 +30,7 @@ namespace Juice.Measurement.Stores
         {
             var summary = new TimeSummary(traceId, name, scopeId, tracker.ToString(true));
             var records = tracker.GetScopes()
-                .Select(s => new TimeRecord
-                {
-                    FullName = s.FullName,
-                    Name = s.Name,
-                    StartedTime = s.StartedTime,
-                    ElapsedTime = s.ElapsedTime,
-                    ScopeId = s.ScopeId,
-                    TraceId = traceId,
-                    RecordedDate = summary.RecordedDate
-                });
+                .Select(s => new TimeRecord(s.Name, s.FullName, s.StartedTime, s.ElapsedTime, s.ScopeId, traceId, summary.RecordedDate));
 
             return repository.SaveTrackDataAsync(summary, records);
         }

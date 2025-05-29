@@ -5,9 +5,14 @@ using Juice.Measurement.Stores;
 
 namespace Juice.Measurement.Api.Grpc.Services
 {
-    internal class TimeStoreService(ITimeRepository timeRepository) : TimeStore.TimeStoreBase
+    internal class TimeStoreService : TimeStore.TimeStoreBase
     {
-        private readonly ITimeRepository _timeRepository = timeRepository;
+        private readonly ITimeRepository _timeRepository;
+
+        public TimeStoreService(ITimeRepository timeRepository)
+        {
+            _timeRepository = timeRepository;
+        }
 
         public override async Task<TimeStoreResult> Save(TimeData request, ServerCallContext context)
         {
@@ -20,16 +25,7 @@ namespace Juice.Measurement.Api.Grpc.Services
                 var records = request.Records
                     .Select(s =>
                     {
-                        return new Stores.TimeRecord
-                        {
-                            Name = s.Name,
-                            FullName = s.FullName,
-                            StartedTime = s.Started.ToTimeSpan(),
-                            ElapsedTime = s.Elapsed.ToTimeSpan(),
-                            ScopeId = s.ScopeId,
-                            TraceId = request.TraceId,
-                            RecordedDate = summary.RecordedDate
-                        };
+                        return new Stores.TimeRecord(s.Name, s.FullName, s.Started.ToTimeSpan(), s.Elapsed.ToTimeSpan(), s.ScopeId, request.TraceId, summary.RecordedDate);
                     });
                 await _timeRepository.SaveTrackDataAsync(summary, records);
                 return new TimeStoreResult

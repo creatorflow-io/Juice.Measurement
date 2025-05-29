@@ -56,7 +56,7 @@ namespace Juice.Measurement.Test.Helpers
                 results.Add(await TestInternalAsync(scope.ServiceProvider, $"Warmup {name} store"));
             }
 
-            await Parallel.ForAsync(0, 10, async (i, token) =>
+            Parallel.For(0, 10, async (i, token) =>
             {
                 using var scope = serviceProvider.CreateScope();
 
