@@ -1,5 +1,6 @@
 ﻿using Juice.Measurement;
 using Juice.Measurement.Internal;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -15,7 +16,7 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 return services;
             }
-            services.AddScoped<ITimeTracker, TimeTracker>();
+            services.TryAddScoped<ITimeTracker, TimeTracker>();
             return services;
         }
     }
