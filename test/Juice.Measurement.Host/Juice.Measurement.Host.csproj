@@ -17,6 +17,5 @@
         <ProjectReference Include="..\..\src\Juice.Measurement.Stores.EF.SqlServer\Juice.Measurement.Stores.EF.SqlServer.csproj" />
         <ProjectReference Include="..\..\src\Juice.Measurement.Stores.EF\Juice.Measurement.Stores.EF.csproj" />
         <ProjectReference Include="..\..\src\Juice.Measurement.Stores.Grpc\Juice.Measurement.Stores.Grpc.csproj" />
-        <ProjectReference Include="..\..\src\Juice.Measurement\Juice.Measurement.csproj" />
     </ItemGroup>
 </Project>

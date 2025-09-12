@@ -7,7 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Juice.Measurement\Juice.Measurement.csproj" />
+        <PackageReference Include="Juice.Measurement" Version="$(JuiceVersion)" />
     </ItemGroup>
-
 </Project>
