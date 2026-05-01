@@ -7,7 +7,6 @@ using System;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit.Abstractions;
 using Microsoft.Extensions.Logging;
 using FluentAssertions;
 using Juice.Measurement.Test.Helpers;

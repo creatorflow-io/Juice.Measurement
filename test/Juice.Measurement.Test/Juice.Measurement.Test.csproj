@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFrameworks>$(AppTargetFramework)</TargetFrameworks>
+        <TargetFrameworks>$(AppTestTargetFramework)</TargetFrameworks>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
         <UserSecretsId>6525e67e-6e87-4b7a-b806-619ea697793c</UserSecretsId>
@@ -9,8 +9,8 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(TestSdk)" />
-        <PackageReference Include="xunit" Version="$(XUnitVersion)" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="2.8.*">
+        <PackageReference Include="xunit.v3" Version="$(XUnitV3Version)" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="$(XUnitRunnerVersion)">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>

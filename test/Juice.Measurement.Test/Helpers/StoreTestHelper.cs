@@ -5,11 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Juice.Measurement.Stores;
 using System.Linq;
 using Juice.Measurement.Internal;
-using Xunit.Abstractions;
-using Grpc.Net.Client.Balancer;
-using Microsoft.VisualStudio.TestPlatform.Utilities;
 using System.Collections.Generic;
 using FluentAssertions;
+using Xunit;
 
 namespace Juice.Measurement.Test.Helpers
 {

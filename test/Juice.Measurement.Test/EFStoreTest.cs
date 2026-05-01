@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using System;
 using Xunit;
-using Xunit.Abstractions;
 using Juice.XUnit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -14,7 +13,7 @@ using Juice.Measurement.Test.Helpers;
 
 namespace Juice.Measurement.Test
 {
-    [TestCaseOrderer("Juice.XUnit.PriorityOrderer", "Juice.XUnit")]
+    [TestCaseOrderer(typeof(PriorityOrderer))]
     public class EFStoreTest
     {
         private readonly ITestOutputHelper _output;

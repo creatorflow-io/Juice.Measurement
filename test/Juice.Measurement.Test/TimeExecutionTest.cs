@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Juice.Measurement.Internal;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Juice.Measurement.Test
 {
