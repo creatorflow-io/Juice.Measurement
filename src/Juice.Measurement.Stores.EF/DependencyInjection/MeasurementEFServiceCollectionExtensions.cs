@@ -59,10 +59,15 @@ namespace Microsoft.Extensions.DependencyInjection
                         throw new NotSupportedException($"Unsupported provider: {provider}");
                 }
                 options
-                    .ReplaceService<IMigrationsAssembly, DbSchemaAwareMigrationAssembly>()
-                ;
-            });
+                    .ReplaceService<IMigrationsAssembly, DbSchemaAwareMigrationAssembly>();
+#if NET9_0_OR_GREATER
+                options.ConfigureWarnings(warnings =>
+                {
+                    warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning);
+                });
+#endif
 
+            });
             services.AddScoped<PooledDbContextFactory>();
             services.AddScoped(sp => sp.GetRequiredService<PooledDbContextFactory>().CreateDbContext());
 

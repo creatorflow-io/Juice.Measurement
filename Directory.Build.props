@@ -10,7 +10,7 @@
     <PackageIconUrl>https://avatars.githubusercontent.com/u/107674950</PackageIconUrl>
     <RepositoryUrl>https://github.com/creatorflow-io/Juice.Measurement</RepositoryUrl>
 
-    <VersionPrefix>10.1.0</VersionPrefix>
+    <VersionPrefix>10.1.1</VersionPrefix>
     <VersionSuffix>local.$([System.DateTime]::Now.ToString(`yyyyMMdd`)).1</VersionSuffix>
   </PropertyGroup>
 
@@ -27,7 +27,7 @@
     <XUnitRunnerVersion>3.1.*</XUnitRunnerVersion>
     <TestSdk>17.11.*</TestSdk>
     <JuiceRefSuffix Condition="'$(JuiceRefSuffix)' == '' And '$(CI)' == ''">-alpha.*</JuiceRefSuffix>
-    <JuiceVersion>10.1.*$(JuiceRefSuffix)</JuiceVersion>
+    <JuiceVersion>10.2.*$(JuiceRefSuffix)</JuiceVersion>
   </PropertyGroup>
 
   <PropertyGroup Label="Versioning" Condition="'$(TargetFramework)' == 'net10.0'">

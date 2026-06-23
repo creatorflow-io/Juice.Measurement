@@ -51,6 +51,7 @@ namespace Juice.Measurement.Test
 
                 services.AddMeasurementEFStores(configuration, options =>
                 {
+                    //options.Schema = null;
                     options.DatabaseProvider = provider;
                 });
 

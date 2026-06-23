@@ -2,12 +2,13 @@
 using Juice.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Juice.Measurement.Stores.EF
 {
-    public class MeasurementDbContext : DbContext, ISchemaDbContext
+    public class MeasurementDbContext : DbContext, ISchemaDbContext, IResettableService
     {
         public DbSet<TimeRecord> TimeRecords { get; set; }
         public DbSet<TimeSummary> TimeSummaries { get; set; }
@@ -34,6 +35,7 @@ namespace Juice.Measurement.Stores.EF
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             using var _ = _tracker?.BeginScope("OnModelCreating", "timetracker.stores.ef.onModelCreating");
+            modelBuilder.HasDefaultSchema(Schema);
             modelBuilder.Entity<TimeRecord>(entity =>
             {
                 entity.Property<Guid>("Id");
@@ -50,7 +52,7 @@ namespace Juice.Measurement.Stores.EF
                 entity.HasIndex(e => e.Name);
                 entity.HasIndex(e => e.RecordedDate);
 
-                entity.ToTable("TimeRecords", Schema);
+                entity.ToTable("TimeRecords");
             });
 
             modelBuilder.Entity<TimeSummary>(entity =>
@@ -63,7 +65,7 @@ namespace Juice.Measurement.Stores.EF
                 entity.HasIndex(e => e.Name);
                 entity.HasIndex(e => e.RecordedDate);
 
-                entity.ToTable("TimeSummaries", Schema);
+                entity.ToTable("TimeSummaries");
             });
         }
 
@@ -71,6 +73,12 @@ namespace Juice.Measurement.Stores.EF
         {
             using var _ = _tracker?.BeginScope("SaveChanges", "timetracker.stores.ef.saveChanges");
             return await base.SaveChangesAsync(cancellationToken);
+        }
+
+        public virtual Task ResetStateAsync(CancellationToken cancellationToken = default)
+        {
+            _tracker = null;
+            return Task.CompletedTask;
         }
     }
 
@@ -133,7 +141,6 @@ namespace Juice.Measurement.Stores.EF
             });
 
             var context = resolver.ServiceProvider.GetRequiredService<MeasurementDbContext>();
-            context.SetSchema("Measurement");
             return context;
         }
     }

@@ -17,7 +17,7 @@ namespace Juice.Measurement.Stores.EF.PostgreSQL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("ProductVersion", "8.0.28")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -41,6 +41,9 @@ namespace Juice.Measurement.Stores.EF.PostgreSQL.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<DateTimeOffset>("RecordedDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("ScopeId")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -54,20 +57,17 @@ namespace Juice.Measurement.Stores.EF.PostgreSQL.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
-                    b.Property<DateTimeOffset>("RecordedDate")
-                        .HasColumnType("timestamp with time zone");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Name");
+
+                    b.HasIndex("RecordedDate");
 
                     b.HasIndex("ScopeId");
 
                     b.HasIndex("TraceId");
 
-                    b.HasIndex("RecordedDate");
-
-                    b.ToTable("TimeRecords", "Measurement");
+                    b.ToTable("TimeRecords", (string)null);
                 });
 
             modelBuilder.Entity("Juice.Measurement.Stores.TimeSummary", b =>
@@ -100,7 +100,7 @@ namespace Juice.Measurement.Stores.EF.PostgreSQL.Migrations
 
                     b.HasIndex("RootScopeId");
 
-                    b.ToTable("TimeSummaries", "Measurement");
+                    b.ToTable("TimeSummaries", (string)null);
                 });
 #pragma warning restore 612, 618
         }
