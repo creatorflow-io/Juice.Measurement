@@ -1,4 +1,5 @@
-﻿using Juice.EF;
+﻿using System.Reflection;
+using Juice.EF;
 using Juice.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -75,10 +76,24 @@ namespace Juice.Measurement.Stores.EF
             return await base.SaveChangesAsync(cancellationToken);
         }
 
-        public virtual Task ResetStateAsync(CancellationToken cancellationToken = default)
+        /// <summary>
+        /// Declaring <see cref="IResettableService"/> here replaces DbContext's own reset: its change tracker, its database facade
+        /// with any open transaction, and its provider's services. C# has no way to call a base class's explicit interface method,
+        /// so it is found through the interface map. Without it, a pooled context keeps that open transaction for the next user.
+        /// </summary>
+        public virtual async Task ResetStateAsync(CancellationToken cancellationToken = default)
         {
             _tracker = null;
-            return Task.CompletedTask;
+            await EFCoreResetAsync(this, cancellationToken);
+        }
+
+        private static readonly Func<DbContext, CancellationToken, Task> EFCoreResetAsync = FindEFCoreResetAsync();
+
+        private static Func<DbContext, CancellationToken, Task> FindEFCoreResetAsync()
+        {
+            var map = typeof(DbContext).GetInterfaceMap(typeof(IResettableService));
+            var index = Array.FindIndex(map.InterfaceMethods, m => m.Name == nameof(IResettableService.ResetStateAsync));
+            return map.TargetMethods[index].CreateDelegate<Func<DbContext, CancellationToken, Task>>();
         }
     }
 
